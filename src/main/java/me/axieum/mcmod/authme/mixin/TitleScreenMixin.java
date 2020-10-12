@@ -16,8 +16,8 @@ import static me.axieum.mcmod.authme.AuthMe.LOGGER;
 public abstract class TitleScreenMixin {
     /**
      * Simply updates the status for the multiplayer screen to display easily,
-     * and allow the player to directly join a world without going first to
-     * the MultiPlayerScreen
+     * and allow the player to directly join a world (and authed) without going first to
+     * the MultiplayerScreen
      *
      * @param ci CallbackInfo supplied by mixin
      */
@@ -25,7 +25,6 @@ public abstract class TitleScreenMixin {
     private void checkStatus(CallbackInfo ci){
         if (FabricLoader.getInstance().isDevelopmentEnvironment()){
             LOGGER.debug("Fetching Status for MultiplayerScreen");
-
             SessionUtil.getStatus();
         }
     }

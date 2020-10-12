@@ -61,6 +61,9 @@ public class SessionUtil
      * validate the stored tokens, and hence is executed on a separate thread.
      * The response is cached for ~1 minutes.
      *
+     * Also validates if auto-auth is enabled for development environment,
+     * and tries to execute auto-auth if so and config is enabled as well
+     *
      * @return completable future for the status (async)
      */
     public static CompletableFuture<Status> getStatus()

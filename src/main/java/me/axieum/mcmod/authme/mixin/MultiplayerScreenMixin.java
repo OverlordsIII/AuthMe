@@ -48,6 +48,8 @@ public abstract class MultiplayerScreenMixin extends Screen
         this.addButton(authButton);
 
         // Fetch current session status
+        //if the loader is not in a dev env, no need to set it to unknown
+        //since it is already set by the TitleScreen Mixin
         if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
             MultiplayerScreenMixin.status = Status.UNKNOWN;
         }
