@@ -7,9 +7,12 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import com.mojang.util.UUIDTypeAdapter;
+import me.axieum.mcmod.authme.AuthMe;
 import me.axieum.mcmod.authme.api.Status;
+import me.axieum.mcmod.authme.config.AuthMeDevConfig;
 import me.axieum.mcmod.authme.mixin.MinecraftClientAccess;
 import me.axieum.mcmod.authme.mixin.RealmsMainScreenAccess;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Session.AccountType;
@@ -17,6 +20,7 @@ import net.minecraft.client.util.Session.AccountType;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 import static me.axieum.mcmod.authme.AuthMe.LOGGER;
 
@@ -81,8 +85,42 @@ public class SessionUtil
                     lastStatus = Status.INVALID;
                 }
             } catch (AuthenticationException e) {
-                LOGGER.warn("Unable to validate the session: {}", e.getMessage());
-                lastStatus = Status.INVALID;
+                if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                    AuthMeDevConfig config = AuthMe.DEV_CONFIG;
+                    if (config.shouldUseSavedInfo){
+                    if (!config.password.isEmpty() && !config.offlineDevMode){
+                       CompletableFuture<Session> session1 = login(config.email, config.password);
+                        try {
+                            if (!session1.get().getUsername().equals(session.getUsername())){
+                                LOGGER.info("Sucessfully Auto-Authenticated into Minecraft. Current User is now : {}", session1.get().getUsername());
+                                lastStatus = Status.VALID;
+                            }
+                            else{
+                                LOGGER.error("Failed to Auto-Authenticate into Minecraft. User is still : {}", session1.get().getUsername());
+                                lastStatus = Status.INVALID;
+                            }
+                        } catch (InterruptedException | ExecutionException ex) {
+                            LOGGER.warn("Unable to validate session: {}", ex.getCause().toString());
+                            lastStatus = Status.INVALID;
+                        }
+                    }
+                    else{
+                       Session session1 = login(config.username);
+                       if (!session1.getUsername().equals(session.getUsername())){
+                           LOGGER.info("Sucessfully Auto-Authenticated into Offline Minecraft. Offline User is now : {}", session1.getUsername());
+                           lastStatus = Status.VALID;
+                       }
+                       else{
+                           LOGGER.error("Failed to Auto-Authenticate for offline use. Current User is still : {}", session1.getUsername());
+                       }
+
+                    }
+                }
+            }
+                else {
+                    LOGGER.warn("Unable to validate the session: {}", e.getMessage());
+                    lastStatus = Status.INVALID;
+                }
             }
 
             lastStatusCheck = System.currentTimeMillis();
