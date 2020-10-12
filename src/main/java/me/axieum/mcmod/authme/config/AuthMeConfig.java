@@ -18,7 +18,6 @@ public class AuthMeConfig implements ConfigData
     @Comment("Auth Button")
     @ConfigEntry.Gui.CollapsibleObject
     public AuthButton authButton = new AuthButton();
-
     /**
      * Authentication button configuration.
      */
