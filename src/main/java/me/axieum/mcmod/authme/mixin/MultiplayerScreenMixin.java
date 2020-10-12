@@ -6,6 +6,7 @@ import me.axieum.mcmod.authme.config.AuthMeConfig;
 import me.axieum.mcmod.authme.gui.AuthScreen;
 import me.axieum.mcmod.authme.gui.widget.AuthButtonWidget;
 import me.axieum.mcmod.authme.util.SessionUtil;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -47,7 +48,9 @@ public abstract class MultiplayerScreenMixin extends Screen
         this.addButton(authButton);
 
         // Fetch current session status
-        MultiplayerScreenMixin.status = Status.UNKNOWN;
+        if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            MultiplayerScreenMixin.status = Status.UNKNOWN;
+        }
         SessionUtil.getStatus().thenAccept(status -> MultiplayerScreenMixin.status = status);
     }
 
