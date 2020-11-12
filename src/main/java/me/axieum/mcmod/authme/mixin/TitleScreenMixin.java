@@ -14,6 +14,7 @@ import static me.axieum.mcmod.authme.AuthMe.LOGGER;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin {
+    private boolean hasDone = true;
     /**
      * Simply updates the status for the multiplayer screen to display easily,
      * and allow the player to directly join a world (and authed) without going first to
@@ -23,9 +24,10 @@ public abstract class TitleScreenMixin {
      */
     @Inject(method = "init", at = @At("HEAD"))
     private void checkStatus(CallbackInfo ci){
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()){
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()  && hasDone){
             LOGGER.debug("Fetching Status for MultiplayerScreen");
             SessionUtil.getStatus();
+            hasDone = false; //make sure we dont do this everytime we go to title screen, only the first time we go there
         }
     }
 }
